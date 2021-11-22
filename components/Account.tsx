@@ -94,6 +94,25 @@ export default function Account() {
 const ChainName = () => {
   const { chainId } = useWeb3React()
 
+  let chainName
+
+  if (chainId) {
+    // BFA Mainnet
+    if (chainId == 200941592) {
+      chainName = 'BFA Mainnet'
+    }
+    // BFA Testnet
+    else if (chainId == 99118822) {
+      chainName = 'BFA Testnet'
+    }
+    else {
+      const chain = getChain(chainId)
+      if (chain) {
+        chainName = chain.name
+      }
+    }
+  }
+
   return (
     <>
     {(chainId) && (
@@ -101,7 +120,7 @@ const ChainName = () => {
         <span role="img" aria-label="chain">
           ⛓
         </span>
-        <span>{getChain(chainId).name}</span>
+        <span>{chainName}</span>
       </>
     )}
     </>

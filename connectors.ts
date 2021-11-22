@@ -20,7 +20,9 @@ export const injected = new InjectedConnector({ supportedChainIds: [
   5, // Goerli
   42, // Kovan
   30, // RSK Mainnet
-  31 // RSK Testnet
+  31, // RSK Testnet
+  200941592, // BFA Mainnet
+  99118822 // BFA Testnet
 ]})
 
 export const network = new NetworkConnector({
