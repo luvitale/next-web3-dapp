@@ -5,9 +5,7 @@ import {
   UserRejectedRequestError as UserRejectedRequestErrorInjected
 } from '@web3-react/injected-connector'
 import { UserRejectedRequestError as UserRejectedRequestErrorWalletConnect } from '@web3-react/walletconnect-connector'
-import { UserRejectedRequestError as UserRejectedRequestErrorFrame } from '@web3-react/frame-connector'
 import { Web3Provider } from '@ethersproject/providers'
-import { formatEther } from '@ethersproject/units'
 
 import useEagerConnect from '../hooks/useEagerConnect'
 import useInactiveListener from '../hooks/useInactiveListener'
@@ -19,14 +17,11 @@ import {
   ledger,
   trezor,
   lattice,
-  frame,
   authereum,
-  fortmatic,
-  magic,
-  portis,
-  torus
 } from '../connectors'
 import { Spinner } from '../components/Spinner'
+
+import { getChain } from '@mintgate/evm-chains'
 
 // Modal
 import Modal from 'react-modal'
@@ -52,12 +47,7 @@ enum ConnectorNames {
   Ledger = 'Ledger',
   Trezor = 'Trezor',
   Lattice = 'Lattice',
-  Frame = 'Frame',
-  //Portis = 'Portis',
   Authereum = 'Authereum',
-  Fortmatic = 'Fortmatic',
-  Magic = 'Magic',
-  Torus = 'Torus'
 }
 
 const connectorsByName: { [connectorName in ConnectorNames]: any } = {
@@ -68,12 +58,7 @@ const connectorsByName: { [connectorName in ConnectorNames]: any } = {
   [ConnectorNames.Ledger]: ledger,
   [ConnectorNames.Trezor]: trezor,
   [ConnectorNames.Lattice]: lattice,
-  [ConnectorNames.Frame]: frame,
-  //[ConnectorNames.Portis]: fortis,
   [ConnectorNames.Authereum]: authereum,
-  [ConnectorNames.Fortmatic]: fortmatic,
-  [ConnectorNames.Magic]: magic,
-  [ConnectorNames.Torus]: torus
 }
 
 const getErrorMessage = (error: Error) => {
@@ -83,8 +68,7 @@ const getErrorMessage = (error: Error) => {
     return "You're connected to an unsupported network."
   } else if (
     error instanceof UserRejectedRequestErrorInjected ||
-    error instanceof UserRejectedRequestErrorWalletConnect ||
-    error instanceof UserRejectedRequestErrorFrame
+    error instanceof UserRejectedRequestErrorWalletConnect
   ) {
     return 'Please authorize this website to access your Ethereum account.'
   } else {
@@ -107,7 +91,7 @@ export default function Account() {
   )
 }
 
-function ChainId() {
+const ChainName = () => {
   const { chainId } = useWeb3React()
 
   return (
@@ -117,7 +101,7 @@ function ChainId() {
         <span role="img" aria-label="chain">
           ⛓
         </span>
-        <span>{chainId}</span>
+        <span>{getChain(chainId).name}</span>
       </>
     )}
     </>
@@ -144,18 +128,81 @@ function Address() {
 }
 
 function Header() {
-  const { active, error } = useWeb3React()
-
   return (
     <>
-      <ChainId />
+      <ChainName />
       <Address />
     </>
   )
 }
 
-const App = () => {
+const Connector = (props: { name: any }) => {
+  const { name } = props
 
+  const context = useWeb3React<Web3Provider>()
+  const { connector, activate, error } = context
+  const [activatingConnector, setActivatingConnector] = React.useState<any>()
+  const triedEager = useEagerConnect()
+  
+  const currentConnector = connectorsByName[name]
+  const activating = currentConnector === activatingConnector
+  const connected = currentConnector === connector
+  const disabled = !triedEager || !!activatingConnector || connected || !!error
+
+  return (
+    <button
+      style={{
+        height: '3rem',
+        borderRadius: '1rem',
+        borderColor: activating ? 'orange' : connected ? 'green' : 'unset',
+        cursor: disabled ? 'unset' : 'pointer',
+        position: 'relative'
+      }}
+      disabled={disabled}
+      key={name}
+      onClick={() => {
+        setActivatingConnector(currentConnector)
+        activate(connectorsByName[name])
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          top: '0',
+          left: '0',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          color: 'black',
+          margin: '0 0 0 1rem'
+        }}
+      >
+        {activating && <Spinner color={'black'} style={{ height: '25%', marginLeft: '-1rem' }} />}
+        {connected && (
+          <span role="img" aria-label="check">
+            ✅
+          </span>
+        )}
+      </div>
+      {name}
+    </button>
+  )
+}
+
+const Connectors = () => {
+
+  return (
+    <>
+      {Object.keys(connectorsByName).map((name, index) => {
+        return (
+          <Connector key={ index } name={ name } />
+        )
+      })}
+    </>
+  )
+}
+
+const App = () => {
   let subtitle;
   const [modalIsOpen, setIsOpen] = React.useState(false);
 
@@ -174,7 +221,7 @@ const App = () => {
 
 
   const context = useWeb3React<Web3Provider>()
-  const { connector, library, chainId, account, activate, deactivate, active, error } = context
+  const { connector, chainId, account, deactivate, active, error } = context
 
   // handle logic to recognize the connector currently being activated
   const [activatingConnector, setActivatingConnector] = React.useState<any>()
@@ -222,51 +269,7 @@ const App = () => {
               borderRadius: '1rem',
               cursor: 'pointer'
           }}>Close</button>
-          {Object.keys(connectorsByName).map(name => {
-            const currentConnector = connectorsByName[name]
-            const activating = currentConnector === activatingConnector
-            const connected = currentConnector === connector
-            const disabled = !triedEager || !!activatingConnector || connected || !!error
-
-            return (
-              <button
-                style={{
-                  height: '3rem',
-                  borderRadius: '1rem',
-                  borderColor: activating ? 'orange' : connected ? 'green' : 'unset',
-                  cursor: disabled ? 'unset' : 'pointer',
-                  position: 'relative'
-                }}
-                disabled={disabled}
-                key={name}
-                onClick={() => {
-                  setActivatingConnector(currentConnector)
-                  activate(connectorsByName[name])
-                }}
-              >
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '0',
-                    left: '0',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    color: 'black',
-                    margin: '0 0 0 1rem'
-                  }}
-                >
-                  {activating && <Spinner color={'black'} style={{ height: '25%', marginLeft: '-1rem' }} />}
-                  {connected && (
-                    <span role="img" aria-label="check">
-                      ✅
-                    </span>
-                  )}
-                </div>
-                {name}
-              </button>
-            )
-          })}
+          <Connectors />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {(active || error) && (
@@ -300,28 +303,6 @@ const App = () => {
             margin: 'auto'
           }}
         >
-          {/*!!(library && account) && (
-            <button
-              style={{
-                height: '3rem',
-                borderRadius: '1rem',
-                cursor: 'pointer'
-              }}
-              onClick={() => {
-                library
-                  .getSigner(account)
-                  .signMessage('👋')
-                  .then((signature: any) => {
-                    window.alert(`Success!\n\n${signature}`)
-                  })
-                  .catch((error: any) => {
-                    window.alert('Failure!' + (error && error.message ? `\n\n${error.message}` : ''))
-                  })
-              }}
-            >
-              Sign Message
-            </button>
-          )*/}
           {!!(connector === connectorsByName[ConnectorNames.Network] && chainId) && (
             <button
               style={{
@@ -362,78 +343,6 @@ const App = () => {
               }}
             >
               Kill WalletLink Session
-            </button>
-          )}
-          {connector === connectorsByName[ConnectorNames.Fortmatic] && (
-            <button
-              style={{
-                height: '3rem',
-                borderRadius: '1rem',
-                cursor: 'pointer'
-              }}
-              onClick={() => {
-                ;(connector as any).close()
-              }}
-            >
-              Kill Fortmatic Session
-            </button>
-          )}
-          {connector === connectorsByName[ConnectorNames.Magic] && (
-            <button
-              style={{
-                height: '3rem',
-                borderRadius: '1rem',
-                cursor: 'pointer'
-              }}
-              onClick={() => {
-                ;(connector as any).close()
-              }}
-            >
-              Kill Magic Session
-            </button>
-          )}
-          {/*connector === connectorsByName[ConnectorNames.Portis] && (
-            <>
-              {chainId !== undefined && (
-                <button
-                  style={{
-                    height: '3rem',
-                    borderRadius: '1rem',
-                    cursor: 'pointer'
-                  }}
-                  onClick={() => {
-                    ;(connector as any).changeNetwork(chainId === 1 ? 100 : 1)
-                  }}
-                >
-                  Switch Networks
-                </button>
-              )}
-              <button
-                style={{
-                  height: '3rem',
-                  borderRadius: '1rem',
-                  cursor: 'pointer'
-                }}
-                onClick={() => {
-                  ;(connector as any).close()
-                }}
-              >
-                Kill Portis Session
-              </button>
-            </>
-          )*/}
-          {connector === connectorsByName[ConnectorNames.Torus] && (
-            <button
-              style={{
-                height: '3rem',
-                borderRadius: '1rem',
-                cursor: 'pointer'
-              }}
-              onClick={() => {
-                ;(connector as any).close()
-              }}
-            >
-              Kill Torus Session
             </button>
           )}
         </div>

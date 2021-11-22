@@ -4,28 +4,25 @@ import Link from "next/link";
 import Account from "../components/Account";
 import ETHBalance from "../components/ETHBalance";
 import TokenBalance from "../components/TokenBalance";
-import useEagerConnect from "../hooks/useEagerConnect";
 
 const DAI_TOKEN_ADDRESS = "0x6b175474e89094c44da98b954eedeac495271d0f";
 
 function Home() {
   const { account, library } = useWeb3React();
 
-  const triedToEagerConnect = useEagerConnect();
-
   const isConnected = typeof account === "string" && !!library;
 
   return (
     <div>
       <Head>
-        <title>next-web3-boilerplate</title>
+        <title>Next Web3 Dapp</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <header>
         <nav>
           <Link href="/">
-            <a>next-web3-boilerplate</a>
+            <a>Next Web3 Dapp</a>
           </Link>
 
           <Account />
@@ -34,8 +31,8 @@ function Home() {
 
       <main>
         <h1>
-          <a href="https://github.com/mirshko/next-web3-boilerplate">
-            next-web3-boilerplate
+          <a href="https://github.com/luvitale/next-web3-dapp">
+            Next Web3 Dapp
           </a>
         </h1>
 
