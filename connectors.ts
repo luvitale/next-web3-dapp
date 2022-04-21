@@ -4,8 +4,6 @@ import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
 import { WalletLinkConnector } from '@web3-react/walletlink-connector'
 import { LedgerConnector } from '@web3-react/ledger-connector'
 import { TrezorConnector } from '@web3-react/trezor-connector'
-import { LatticeConnector } from '@web3-react/lattice-connector'
-import { AuthereumConnector } from '@web3-react/authereum-connector'
 
 import { getChain } from '@inti-ar/evm-chains'
 
@@ -57,11 +55,3 @@ export const trezor = new TrezorConnector({
   manifestEmail: 'dummy@abc.xyz',
   manifestAppUrl: 'http://localhost:1234'
 })
-
-export const lattice = new LatticeConnector({
-  chainId: 4,
-  appName: 'web3-react',
-  url: RPC_URLS[4]
-})
-
-export const authereum = new AuthereumConnector({ chainId: 42 })

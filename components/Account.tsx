@@ -16,8 +16,6 @@ import {
   walletlink,
   ledger,
   trezor,
-  lattice,
-  authereum,
 } from '../connectors'
 import { Spinner } from '../components/Spinner'
 
@@ -46,8 +44,6 @@ enum ConnectorNames {
   WalletLink = 'WalletLink',
   Ledger = 'Ledger',
   Trezor = 'Trezor',
-  Lattice = 'Lattice',
-  Authereum = 'Authereum',
 }
 
 const connectorsByName: { [connectorName in ConnectorNames]: any } = {
@@ -57,8 +53,6 @@ const connectorsByName: { [connectorName in ConnectorNames]: any } = {
   [ConnectorNames.WalletLink]: walletlink,
   [ConnectorNames.Ledger]: ledger,
   [ConnectorNames.Trezor]: trezor,
-  [ConnectorNames.Lattice]: lattice,
-  [ConnectorNames.Authereum]: authereum,
 }
 
 const getErrorMessage = (error: Error) => {
