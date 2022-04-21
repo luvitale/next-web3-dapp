@@ -21,7 +21,7 @@ import {
 } from '../connectors'
 import { Spinner } from '../components/Spinner'
 
-import { getChain } from '@mintgate/evm-chains'
+import { getChain } from '@inti-ar/evm-chains'
 
 // Modal
 import Modal from 'react-modal'
@@ -94,24 +94,7 @@ export default function Account() {
 const ChainName = () => {
   const { chainId } = useWeb3React()
 
-  let chainName
-
-  if (chainId) {
-    // BFA Mainnet
-    if (chainId == 200941592) {
-      chainName = 'BFA Mainnet'
-    }
-    // BFA Testnet
-    else if (chainId == 99118822) {
-      chainName = 'BFA Testnet'
-    }
-    else {
-      const chain = getChain(chainId)
-      if (chain) {
-        chainName = chain.name
-      }
-    }
-  }
+  let chainName = chainId ? getChain(chainId).name : 'Unknown'
 
   return (
     <>

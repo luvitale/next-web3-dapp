@@ -1,5 +1,5 @@
 {
-  "name": "next-web3-boilerplate",
+  "name": "next-web3-dapp",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "compile-contract-types": "typechain --target ethers-v5 --out-dir './contracts/types' './contracts/*.json'",
+    "compile-contract-types": "run-script-os",
+    "compile-contract-types:darwin:linux": "typechain --target ethers-v5 --out-dir './contracts/types' './contracts/*.json'",
+    "compile-contract-types:win32": "typechain --target ethers-v5 --out-dir contracts/types contracts/*.json",
     "postinstall": "yarn compile-contract-types"
   },
   "dependencies": {
@@ -16,9 +18,9 @@
     "@ethersproject/providers": "^5.5.0",
     "@ethersproject/units": "^5.5.0",
     "@ethersproject/wallet": "^5.5.0",
+    "@inti-ar/evm-chains": "^1.0.0",
     "@metamask/detect-provider": "^1.2.0",
     "@metamask/onboarding": "^1.0.1",
-    "@mintgate/evm-chains": "^0.4.0",
     "@web3-react/authereum-connector": "^6.2.0",
     "@web3-react/core": "^6.1.9",
     "@web3-react/injected-connector": "^6.0.7",
@@ -40,6 +42,7 @@
     "eslint": "7.32.0",
     "eslint-config-next": "12.0.2",
     "ethers": "^5.5.1",
+    "run-script-os": "^1.1.6",
     "typechain": "^6.0.2",
     "typescript": "^4.4.4"
   }

@@ -7,13 +7,11 @@ import { TrezorConnector } from '@web3-react/trezor-connector'
 import { LatticeConnector } from '@web3-react/lattice-connector'
 import { AuthereumConnector } from '@web3-react/authereum-connector'
 
-const POLLING_INTERVAL = 12000
-const RPC_URLS: { [chainId: number]: string } = {
-  1: `https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
-  4: `https://rinkeby.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
-}
+import { getChain } from '@inti-ar/evm-chains'
 
-export const injected = new InjectedConnector({ supportedChainIds: [
+const POLLING_INTERVAL = 12000
+
+const SUPPORTED_CHAIN_IDS = [
   1, // Ethereum Mainnet
   3, // Ropsten
   4, // Rinkeby
@@ -22,23 +20,32 @@ export const injected = new InjectedConnector({ supportedChainIds: [
   30, // RSK Mainnet
   31, // RSK Testnet
   200941592, // BFA Mainnet
-  99118822 // BFA Testnet
-]})
+  99118822, // BFA Testnet
+];
+
+const RPC_URLS: { [chainId: number]: string } = SUPPORTED_CHAIN_IDS.reduce((acc, chainId) => {
+  const { rpc } = getChain(chainId)
+  acc[chainId] = rpc[0]
+
+  return acc
+}, {})
+
+export const injected = new InjectedConnector({ supportedChainIds: SUPPORTED_CHAIN_IDS})
 
 export const network = new NetworkConnector({
-  urls: { 1: RPC_URLS[1], 4: RPC_URLS[4] },
+  urls: RPC_URLS,
   defaultChainId: 1
 })
 
 export const walletconnect = new WalletConnectConnector({
-  rpc: { 1: RPC_URLS[1] },
+  rpc: RPC_URLS,
   qrcode: true
 })
 
 export const walletlink = new WalletLinkConnector({
   url: RPC_URLS[1],
   appName: 'web3-react example',
-  supportedChainIds: [1, 3, 4, 5, 42, 10, 137, 69, 420, 80001]
+  supportedChainIds: SUPPORTED_CHAIN_IDS
 })
 
 export const ledger = new LedgerConnector({ chainId: 1, url: RPC_URLS[1], pollingInterval: POLLING_INTERVAL })
